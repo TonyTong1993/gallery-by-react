@@ -27,14 +27,11 @@ class ImgFigure extends React.Component {
 
 class AppComponent extends React.Component { 
 	 //构建展示舞台的区域约束对象
-	 getInitialState() {
-	 	return {
-	 		ranges:[
-	 		pos:{
-	 			left:'0',
-	 			top:'0',
-	 		}]
-	 	}
+	 constructor() {
+	 	super();
+	 	this.state = {
+	 	ranges:[]	
+	 	};
 	 }
      constant = {
     	centerPos:{
