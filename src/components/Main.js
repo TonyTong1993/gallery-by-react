@@ -15,6 +15,10 @@ imageDatas = (function genImageURL (imageDataArr) {
 function getRandomRange(low,high) {
   return Math.ceil(Math.random() * (high -low) + low)
 }
+//随机获取+-30度
+function get30DegRandom () {
+   return (Math.random() > 0.5 ? '':'-' + Math.ceil(Math.random() * 30))
+}
 var constant = {
         centerPos:{
             left:0,
@@ -41,7 +45,11 @@ class ImgFigure extends React.Component {
         if (this.props.arrange.pos) {
             styleObj = this.props.arrange.pos;
         }
-
+        if (this.props.arrange.ratote) {
+           (['MozTransform', 'msTransform', 'WebkitTransform', 'transform']).forEach(function (value) {
+            styleObj[value] = 'rotate(' + this.props.arrange.ratote + 'deg)';
+          }.bind(this));
+        }
 		return ( <figure className="img-figure" style = {styleObj}>
 		<img src={this.props.data.imageURL} alt={this.props.data.title}/>
 		<figcaption className="img-figcaption">
@@ -77,17 +85,21 @@ class AppComponent extends React.Component {
     	//取中心图片位置对象
     	var imgsArrangeCenterArr = imgsArrangeArr.splice(centerIndex,1);
     	//将中心位置赋值给图片
-    	imgsArrangeCenterArr[0].pos = centerPos;
+    	imgsArrangeCenterArr[0] ={
+                pos:centerPos,
+                ratote:0};
     	//随机获取顶部图片
     	topImgSpliceIndex = Math.ceil(Math.random() * (imgsArrangeArr.length - topImageNum));
     	imgsArrangeTopArr = imgsArrangeArr.splice(topImgSpliceIndex,topImageNum);
     	//随机产生顶部区域的位置；通过forEach有效避免数组为空值，导致数组越界
     	imgsArrangeTopArr.forEach(function(value) {
-    		value.pos = {
-    			top:getRandomRange(VPRTopY[0],VPRTopY[1]),
-    			left:getRandomRange(VPRX[0],VPRX[1])
-    			}
-    		
+            value = {
+                pos : {
+                      top:getRandomRange(VPRTopY[0],VPRTopY[1]),
+                      left:getRandomRange(VPRX[0],VPRX[1])
+                },
+                ratote:get30DegRandom()
+            }		
     	});
     	//布局左右两侧的图片
     	for (var i = 0, j = imgsArrangeArr.length, k = j / 2; i < j; i++) {
@@ -97,17 +109,19 @@ class AppComponent extends React.Component {
     		}else {//布局右边
     			hPosRangeLORX = HPRRightSec;
     		}
-    		imgsArrangeArr[i].pos = {
-    			left:getRandomRange(hPosRangeLORX[0],hPosRangeLORX[1]),
-    			top:getRandomRange(HPRY[0],HPRY[1])
-    		}
+            imgsArrangeArr[i] = {
+                pos:{
+                    left:getRandomRange(hPosRangeLORX[0],hPosRangeLORX[1]),
+                    top:getRandomRange(HPRY[0],HPRY[1])
+                },
+                ratote: get30DegRandom()
+            }
     	}
         //把取出的对象再插回去
     	if (imgsArrangeArr && imgsArrangeTopArr[0]) {
     		imgsArrangeArr.splice(topImgSpliceIndex,0,imgsArrangeTopArr[0]);
     	}
     	imgsArrangeArr.splice(centerIndex,0,imgsArrangeCenterArr[0]);
-        console.log(imgsArrangeArr);
     	this.setState({
             ranges: imgsArrangeArr
         });
@@ -153,15 +167,14 @@ class AppComponent extends React.Component {
     imageDatas.forEach(function(value,index) {
     	if (!this.state.ranges[index]) {
     		//随机产生图片的位置信息
-             console.log("初始化");
     		this.state.ranges[index] = {
     			pos: {
                     left: 0,
                     top: 0
-                }
+                },
+                ratote:0
     		}
     	}
-        console.log("imageDatas.forEach");
      imgFigures.push(<ImgFigure data= {value} key={index} ref = {'imgFigure' + index} arrange = {this.state.ranges[index]}/>)
 
     }.bind(this));
