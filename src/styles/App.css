@@ -23,6 +23,7 @@ body {
   overflow: hidden;
   background-color: #ddd;
 }
+/*sec->figure->figcaption*/
 .img-figure {
     position: absolute;
     width: 320px;

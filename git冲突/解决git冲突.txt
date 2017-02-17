@@ -1,0 +1,9 @@
+1. git branch newbranch
+2.git branch
+3.git checkout newbranch
+4.git add .
+5.git commit -a
+6.git checkout master
+7.git merge newbranch
+8.git diff
+9.git push -u origin master

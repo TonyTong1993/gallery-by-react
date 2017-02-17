@@ -15,6 +15,21 @@ imageDatas = (function genImageURL (imageDataArr) {
 function getRandomRange(low,high) {
   return Math.ceil(Math.random() * (high -low) + low)
 }
+var constant = {
+        centerPos:{
+            left:0,
+            top:0
+        },
+        hPosRange:{
+            leftSec:[0,0],
+            rightSec:[0,0],
+            y:[0,0]
+        },
+        vPosRange:{
+            x:[0,0],
+            topY:[0,0]
+        }
+    };
 import React from 'react';
 import ReactDOM from 'react-dom';
    
@@ -27,8 +42,8 @@ class ImgFigure extends React.Component {
             styleObj = this.props.arrange.pos;
         }
 
-		return ( <figure className="img-figure">
-		<img src={this.props.data.imageURL} alt={this.props.data.title} style = {styleObj}/>
+		return ( <figure className="img-figure" style = {styleObj}>
+		<img src={this.props.data.imageURL} alt={this.props.data.title}/>
 		<figcaption className="img-figcaption">
 		<h2 className="img-title">{this.props.data.title}</h2>
 		</figcaption>
@@ -38,27 +53,13 @@ class AppComponent extends React.Component {
 	 //构建展示舞台的区域约束对象
 	 constructor() {
 	 	super();
-	 	this.state = { ranges:[] };
+	 	this.state = { 
+	 	ranges:[]//存放图片位置信息的状态
+	 	 }
 	 }
-     constant = {
-    	centerPos:{
-    		left:0,
-    		top:0
-    	},
-    	hPosRange:{
-    		leftSec:[0,0],
-    		rightSec:[0,0],
-    		y:[0,0]
-    	},
-    	vPosRange:{
-    		x:[0,0],
-    		topY:[0,0]
-    	}
-    }
     //重新排布视图
-    reLayoutUI(centerIndex) {
+    rearrange(centerIndex) {
     	var imgsArrangeArr = this.state.ranges;
-    	var constant = this.constant;
     	var centerPos = constant.centerPos;
     	var hPosRange = constant.hPosRange;
     	var vPosRange = constant.vPosRange;
@@ -89,9 +90,9 @@ class AppComponent extends React.Component {
     		
     	});
     	//布局左右两侧的图片
-    	for (var i = imgsArrangeArr.length - 1 , k = i/2; i >= 0; i--) {
+    	for (var i = 0, j = imgsArrangeArr.length, k = j / 2; i < j; i++) {
     		var hPosRangeLORX = null;
-    		if (k > i) {//布局左边
+    		if (i < k) {//布局左边
     			hPosRangeLORX = HPRLeftSec;
     		}else {//布局右边
     			hPosRangeLORX = HPRRightSec;
@@ -101,10 +102,12 @@ class AppComponent extends React.Component {
     			top:getRandomRange(HPRY[0],HPRY[1])
     		}
     	}
+        //把取出的对象再插回去
     	if (imgsArrangeArr && imgsArrangeTopArr[0]) {
     		imgsArrangeArr.splice(topImgSpliceIndex,0,imgsArrangeTopArr[0]);
     	}
     	imgsArrangeArr.splice(centerIndex,0,imgsArrangeCenterArr[0]);
+        console.log(imgsArrangeArr);
     	this.setState({
             ranges: imgsArrangeArr
         });
@@ -124,25 +127,24 @@ class AppComponent extends React.Component {
     	var	halfImageFigureW = Math.ceil(imgFigureW/2);
     	var	halfImageFigureH = Math.ceil(imgFigureH/2);
     		//计算中心点的位置
-    		this.constant.centerPos = {
+    		constant.centerPos = {
     			left:halfStageW-halfImageFigureW,
     			top:halfStageH-halfImageFigureH
     		}
     		//计算左、右范围
-    		this.constant.hPosRange.leftSec[0] = -halfImageFigureW;
-    		this.constant.hPosRange.leftSec[1] = halfStageW - halfImageFigureW * 3;
-    		this.constant.hPosRange.rightSec[0] = halfStageW + halfImageFigureW;
-    		this.constant.hPosRange.rightSec[1] = stageW - halfImageFigureW;
-    		this.constant.hPosRange.y[0] = -halfImageFigureH;
-    		this.constant.hPosRange.y[1] = stageH - halfImageFigureH;
+    		constant.hPosRange.leftSec[0] = -halfImageFigureW;
+    		constant.hPosRange.leftSec[1] = halfStageW - halfImageFigureW * 3;
+    		constant.hPosRange.rightSec[0] = halfStageW + halfImageFigureW;
+    		constant.hPosRange.rightSec[1] = stageW - halfImageFigureW;
+    		constant.hPosRange.y[0] = -halfImageFigureH;
+    		constant.hPosRange.y[1] = stageH - halfImageFigureH;
 
-    		this.constant.vPosRange.x[0] = halfStageW-imgFigureW;
-    		this.constant.vPosRange.x[1] =  halfStageW;
-    		this.constant.vPosRange.topY[0] = -halfImageFigureH;
-    		this.constant.vPosRange.topY[1] = halfStageH - halfImageFigureH * 3;
-
+    		constant.vPosRange.x[0] = halfStageW-imgFigureW;
+    		constant.vPosRange.x[1] =  halfStageW;
+    		constant.vPosRange.topY[0] = -halfImageFigureH;
+    		constant.vPosRange.topY[1] = halfStageH - halfImageFigureH * 3;
     		//设置默认排布centerIndex
-    		this.reLayoutUI(0);
+    		this.rearrange(0);
 
     }
   render() {
@@ -151,6 +153,7 @@ class AppComponent extends React.Component {
     imageDatas.forEach(function(value,index) {
     	if (!this.state.ranges[index]) {
     		//随机产生图片的位置信息
+             console.log("初始化");
     		this.state.ranges[index] = {
     			pos: {
                     left: 0,
@@ -158,7 +161,9 @@ class AppComponent extends React.Component {
                 }
     		}
     	}
+        console.log("imageDatas.forEach");
      imgFigures.push(<ImgFigure data= {value} key={index} ref = {'imgFigure' + index} arrange = {this.state.ranges[index]}/>)
+
     }.bind(this));
     return (
     	<div id="content" className="content">
